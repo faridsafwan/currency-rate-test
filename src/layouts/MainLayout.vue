@@ -11,7 +11,7 @@
           @click="toggleLeftDrawer"
         />
 
-        <q-toolbar-title> Quasar App </q-toolbar-title>
+        <q-toolbar-title> Practical Question </q-toolbar-title>
 
         <div>Quasar v{{ $q.version }}</div>
       </q-toolbar>
@@ -19,12 +19,25 @@
 
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered class="bg-grey-1">
       <q-list>
-        <q-item-label header class="text-grey-8">
-          Essential Links
-        </q-item-label>
-
+        <q-item-label header class="text-grey-8"> Question </q-item-label>
         <EssentialLink
-          v-for="link in essentialLinks"
+          v-for="link in questionLinks1"
+          :key="link.title"
+          v-bind="link"
+        />
+        <q-item-label header class="text-grey-8">
+          Elasticsearch Search criteria
+        </q-item-label>
+        <EssentialLink
+          v-for="link in questionLinks2"
+          :key="link.title"
+          v-bind="link"
+        />
+        <q-item-label header class="text-grey-8">
+          DynamoDB Search criteria
+        </q-item-label>
+        <EssentialLink
+          v-for="link in questionLinks3"
           :key="link.title"
           v-bind="link"
         />
@@ -40,48 +53,79 @@
 <script lang="ts">
 import EssentialLink from 'components/EssentialLink.vue';
 
-const linksList = [
+const questionList1 = [
   {
-    title: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: 'https://quasar.dev',
-  },
-  {
-    title: 'Github',
-    caption: 'github.com/quasarframework',
+    title: 'Question 1',
+    caption: 'Convert message to lowercase',
     icon: 'code',
-    link: 'https://github.com/quasarframework',
+    link: '/',
   },
   {
-    title: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev',
+    title: 'Question 2',
+    caption: 'Currency Coversion Page',
+    icon: 'code',
+    link: '/question/2',
+  },
+];
+
+const questionList2 = [
+  {
+    title: 'Question 1',
+    caption: 'Search offers where price range between USD 1 to 5',
+    icon: 'code',
+    link: '/elastic/1',
   },
   {
-    title: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev',
+    title: 'Question 2',
+    caption: 'Search offers where seller is_online=true',
+    icon: 'code',
+    link: '/elastic/2',
   },
   {
-    title: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev',
+    title: 'Question 3',
+    caption: 'Search offers where title can match "wrold"',
+    icon: 'code',
+    link: '/elastic/3',
   },
   {
-    title: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev',
+    title: 'Question 4',
+    caption: 'Search offers sort by sellers user_level in DESC',
+    icon: 'code',
+    link: '/elastic/4',
   },
   {
-    title: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev',
+    title: 'Question 5',
+    caption:
+      'Search offers where buyers country is MY, sort by total sales of the offer (in Malaysia) DESC',
+    icon: 'code',
+    link: '/elastic/5',
+  },
+  {
+    title: 'Index Design',
+    caption: 'Design the Elasticsearch index',
+    icon: 'code',
+    link: '/elastic/6',
+  },
+];
+
+const questionList3 = [
+  {
+    title: 'Question 1',
+    caption: 'Search user where email=ss1001@gmail.com',
+    icon: 'code',
+    link: '/dynamo/1',
+  },
+  {
+    title: 'Question 2',
+    caption: 'Search all the users where is_seller=true',
+    icon: 'code',
+    link: '/dynamo/2',
+  },
+  {
+    title: 'DynamoDB table design',
+    caption: 'design a user DynamoDB table',
+    icon: 'code',
+    link: '/dynamo/3',
   },
 ];
 
@@ -98,7 +142,9 @@ export default defineComponent({
     const leftDrawerOpen = ref(false);
 
     return {
-      essentialLinks: linksList,
+      questionLinks1: questionList1,
+      questionLinks2: questionList2,
+      questionLinks3: questionList3,
       leftDrawerOpen,
       toggleLeftDrawer() {
         leftDrawerOpen.value = !leftDrawerOpen.value;
