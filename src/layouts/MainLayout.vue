@@ -58,7 +58,7 @@ const questionList1 = [
     title: 'Question 1',
     caption: 'Convert message to lowercase',
     icon: 'code',
-    link: '/',
+    link: '/question/1',
   },
   {
     title: 'Question 2',
