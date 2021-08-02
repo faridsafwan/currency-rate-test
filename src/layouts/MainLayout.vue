@@ -12,10 +12,83 @@
         />
 
         <q-toolbar-title> Practical Question </q-toolbar-title>
-
+        <div v-if="!user" class="q-pa-sm q-gutter-md">
+          <q-btn
+            color="secondary"
+            label="Login as seller"
+            @click="login('seller')"
+          />
+          <q-btn
+            color="secondary"
+            label="Login as buyer"
+            @click="login('buyer')"
+          />
+        </div>
+        <div class="q-px-lg">
+          <b>{{ currentLogin }}</b>
+        </div>
         <div>Quasar v{{ $q.version }}</div>
+        <q-btn
+          dense
+          round
+          flat
+          icon="notifications"
+          class="q-mx-md"
+          @click="toggleNotification"
+        >
+          <q-badge color="red" floating transparent>
+            {{ purchaseOrder.length + soldOrder.length }}
+          </q-badge>
+        </q-btn>
       </q-toolbar>
     </q-header>
+    <div v-if="notificationOpen" class="q-pa-md absolute dropout">
+      <q-card class="my-card">
+        <q-card-actions class="q-pa-md text-grey-6" align="center">
+          No order cancellation
+        </q-card-actions>
+        <q-card-actions class="q-pa-md bg-grey-3" align="between">
+          <span>PURCHASE ORDERS</span>
+          <span class="text-red-9"
+            >View all <q-icon class="q-pl-sm" name="arrow_forward" />
+          </span>
+        </q-card-actions>
+        <div v-if="purchaseOrder.length > 0">
+          <q-card-actions
+            v-for="order of purchaseOrder"
+            :key="order"
+            class="q-pa-md"
+            align="between"
+          >
+            <span>{{ order['orderId'] }}</span>
+            <span>{{ order['status'] }}</span>
+          </q-card-actions>
+        </div>
+        <q-card-actions v-else class="q-pa-md text-grey-6" align="center">
+          No sold order
+        </q-card-actions>
+        <q-card-actions class="q-pa-md bg-grey-3" align="between">
+          <span>SOLD ORDERS</span>
+          <span class="text-red-10"
+            >View all <q-icon class="q-pl-sm" name="arrow_forward" />
+          </span>
+        </q-card-actions>
+        <div v-if="soldOrder.length > 0">
+          <q-card-actions
+            v-for="order of soldOrder"
+            :key="order"
+            class="q-pa-md"
+            align="between"
+          >
+            <span>{{ order['orderId'] }}</span>
+            <span>{{ order['status'] }}</span>
+          </q-card-actions>
+        </div>
+        <q-card-actions v-else class="q-pa-md text-grey-6" align="center">
+          No sold order
+        </q-card-actions>
+      </q-card>
+    </div>
 
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered class="bg-grey-1">
       <q-list>
@@ -129,7 +202,9 @@ const questionList3 = [
   },
 ];
 
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, computed } from 'vue';
+import { io, Socket } from 'socket.io-client';
+import { DefaultEventsMap } from 'socket.io-client/build/typed-events';
 
 export default defineComponent({
   name: 'MainLayout',
@@ -140,16 +215,70 @@ export default defineComponent({
 
   setup() {
     const leftDrawerOpen = ref(false);
+    const notificationOpen = ref(false);
+    const purchaseOrder = ref([]);
+    const soldOrder = ref([]);
+    const user = ref('');
+
+    let socket: Socket<DefaultEventsMap, DefaultEventsMap>;
+
+    let login = (loginUser: string) => {
+      user.value = loginUser;
+      purchaseOrder.value = [];
+      soldOrder.value = [];
+      socket = io('http://localhost:3000', { auth: { token: user.value } });
+
+      socket.on('connect', () => {
+        console.log(`Connected with id: ${socket.id}`);
+      });
+
+      socket.on('buyer-notification', (n: []) => {
+        purchaseOrder.value = n;
+        soldOrder.value = [];
+      });
+
+      socket.on('seller-notification', (n: []) => {
+        soldOrder.value = n;
+        purchaseOrder.value = [];
+      });
+    };
+
+    let currentLogin = computed(() => {
+      return user.value ? `Login as ${user.value}` : 'Please login first !';
+    });
 
     return {
       questionLinks1: questionList1,
       questionLinks2: questionList2,
       questionLinks3: questionList3,
       leftDrawerOpen,
+      notificationOpen,
       toggleLeftDrawer() {
         leftDrawerOpen.value = !leftDrawerOpen.value;
       },
+      toggleNotification() {
+        notificationOpen.value = !notificationOpen.value;
+      },
+      login,
+      currentLogin,
+      purchaseOrder,
+      soldOrder,
+      user,
     };
   },
 });
 </script>
+
+<style scoped>
+.dropout {
+  max-width: 350px;
+  top: 2.5rem;
+  right: 2rem;
+  z-index: 1;
+}
+
+.my-card {
+  width: 100%;
+  min-width: 350px;
+}
+</style>
